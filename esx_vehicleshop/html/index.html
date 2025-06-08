@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8" />
+    <title>PDM Vehicle Shop</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+    <!-- Test Drive Timer -->
+    <div id="testDriveTimer" class="test-drive-timer" style="display:none;">
+        <div class="timer-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                <path fill="#fff" d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/>
+                <path fill="#fff" d="M13 7h-2v6l4.4 2.7.6-.9-3-1.8z"/>
+            </svg>
+        </div>
+        <span id="testDriveTimerText"></span>
+    </div>
+
+    <!-- Main Vehicle Shop Container -->
+    <div id="vehicle-shop" class="container" style="display: none;">
+        <div class="shop-header">
+            <h1>PDM <small>Premium Deluxe Motorsport</small></h1>
+            <button id="leaveBtn" class="btn purchase">
+                <span class="leave-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" style="margin-right: 6px;" fill="#385fad">
+                        <path fill="#385fad" d="M13 3v2h2v10h-2v2h4V3h-4zm0 8V9H5.4l4.3-4.3l-1.4-1.4L1.6 10l6.7 6.7l1.4-1.4L5.4 11H13z"/>
+                    </svg>
+                    Leave
+                </span>
+            </button>
+        </div>
+        <div class="content" style="display: flex; gap: 15px;">
+            <div class="vehicles-grid" style="flex: 3;">
+                <!-- Vehicles will be added here dynamically -->
+            </div>
+            <div class="filters-section" style="flex: 1;">
+                <!-- Search Input -->
+                <div class="search-input-wrapper">
+                    <span class="search-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M8.195 0c4.527 0 8.196 3.62 8.196 8.084a7.989 7.989 0 0 1-1.977 5.267l5.388 5.473a.686.686 0 0 1-.015.98a.71.71 0 0 1-.993-.014l-5.383-5.47a8.23 8.23 0 0 1-5.216 1.849C3.67 16.169 0 12.549 0 8.084C0 3.62 3.67 0 8.195 0Zm0 1.386c-3.75 0-6.79 2.999-6.79 6.698c0 3.7 3.04 6.699 6.79 6.699s6.791-3 6.791-6.699c0-3.7-3.04-6.698-6.79-6.698Z" fill="#385fad"/>
+                        </svg>
+                    </span>
+                    <input type="text" id="searchInput" placeholder="Search..." />
+                </div>
+                
+                <!-- Price Range -->
+                <label class="price-range-label">
+                    <span class="input-dollar-wrapper">
+                        <input type="number" id="minPriceInput" min="0" max="5000000" step="1" value="5000000" />
+                        <span class="input-dollar-suffix">$</span>
+                    </span>
+                    <div class="price-label-row">
+                        <span class="price-label-text">Price Range</span>
+                        <span class="price-label-value" id="maxPriceLabel">$5,000,000</span>
+                    </div>
+                </label>
+                <input type="range" id="priceRange" min="0" max="5000000" step="1" value="5000000" />
+
+                <!-- Speed Range -->
+                <label class="speed-range-label">
+                    <span class="input-mph-wrapper">
+                        <input type="number" id="maxSpeedInput" min="0" max="300" step="1" value="300" />
+                        <span class="input-mph-suffix">mph</span>
+                    </span>
+                    <div class="speed-label-row">
+                        <span class="speed-label-text">Speed Range</span>
+                        <span class="speed-label-value" id="speedValue">300 mph</span>
+                    </div>
+                </label>
+                <input type="range" id="speedRange" min="0" max="300" step="1" value="300" />
+
+                <!-- Categories Filter -->
+                <div id="classFilter" class="collapsible-filter">
+                    <button type="button" class="collapsible-toggle">
+                        <span>Filtr vozidel</span>
+                        <svg class="collapsible-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M6 8l4 4 4-4" stroke="#bfc8e2" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="collapsible-content">
+                        <div class="categories-list">
+                            <label><input type="checkbox" value="compacts" /> Compacts</label>
+                            <label><input type="checkbox" value="muscle" /> Muscle</label>
+                            <label><input type="checkbox" value="motorcycles" /> Motorcycles</label>
+                            <label><input type="checkbox" value="sedans" /> Sedans</label>
+                            <label><input type="checkbox" value="sports" /> Sports</label>
+                            <label><input type="checkbox" value="suvs" /> SUVs</label>
+                            <label><input type="checkbox" value="vans" /> Vans</label>
+                            <label><input type="checkbox" value="off-road" /> Off-Road</label>
+                            <label><input type="checkbox" value="super" /> Super</label>
+                            <label><input type="checkbox" value="coupes" /> Coupes</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Color Picker Container -->
+    <div id="colorPicker" class="color-picker-container" style="display: none;">
+        <div class="color-picker-header">
+            <h2>Choose Vehicle Color</h2>
+        </div>
+
+        <div class="vehicle-preview">
+             <img id="vehiclePreviewImage" src="" alt="Vehicle Preview">
+        </div>
+        
+        <div class="color-grid">
+            <div class="color-option" data-color="black" style="background-color: #000000;"></div>
+            <div class="color-option" data-color="white" style="background-color: #FFFFFF;"></div>
+            <div class="color-option" data-color="red" style="background-color: #FF0000;"></div>
+            <div class="color-option" data-color="blue" style="background-color: #0000FF;"></div>
+            <div class="color-option" data-color="green" style="background-color: #00FF00;"></div>
+            <div class="color-option" data-color="yellow" style="background-color: #FFFF00;"></div>
+            <div class="color-option" data-color="orange" style="background-color: #FFA500;"></div>
+            <div class="color-option" data-color="purple" style="background-color: #800080;"></div>
+            <div class="color-option" data-color="pink" style="background-color: #FFC0CB;"></div>
+            <div class="color-option" data-color="gray" style="background-color: #808080;"></div>
+        </div>
+
+        <div class="price-info">
+            <span id="vehiclePrice"></span>
+        </div>
+
+        <div class="color-picker-buttons">
+            <button id="confirmColorBtn" class="btn purchase">Purchase</button>
+            <button id="backFromColorBtn" class="btn back">Back</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
