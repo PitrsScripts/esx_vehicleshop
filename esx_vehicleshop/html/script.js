@@ -15,18 +15,9 @@ let vehicles = {};
 let currentVehicle = null;
 let currentVehicleData = null;
 let currentVehicleImage = null;
-const colorMap = {
-    'black': { r: 0, g: 0, b: 0 },
-    'white': { r: 255, g: 255, b: 255 },
-    'red': { r: 255, g: 0, b: 0 },
-    'blue': { r: 0, g: 0, b: 255 },
-    'green': { r: 0, g: 255, b: 0 },
-    'yellow': { r: 255, g: 255, b: 0 },
-    'orange': { r: 255, g: 165, b: 0 },
-    'purple': { r: 128, g: 0, b: 128 },
-    'pink': { r: 255, g: 192, b: 203 },
-    'gray': { r: 128, g: 128, b: 128 }
-};
+let currentShopType = 'car'; // Výchozí typ obchodu
+// Barvy budou načteny z configu
+let colorMap = {};
 
 // Test Drive Timer proměnné
 let testDriveCountdown = null;
@@ -47,7 +38,7 @@ function openColorPicker(vehicleData) {
     vehiclePreviewImage.src = vehicleData.image || 'placeholder.png';
     
     // Nastavit cenu
-    vehiclePrice.textContent = `${parseInt(vehicleData.price).toLocaleString()}`;
+    vehiclePrice.textContent = `$ ${parseInt(vehicleData.price).toLocaleString()}`;
     
     mainShop.style.display = 'none';
     colorPicker.style.display = 'block';
@@ -63,17 +54,6 @@ function openColorPicker(vehicleData) {
         firstColor.classList.add('selected');
         console.log('Selected color:', firstColor.dataset.color);
     }
-    
-    // Přidat event listenery na barvy
-    document.querySelectorAll('.color-option').forEach(option => {
-        option.addEventListener('click', function() {
-            document.querySelectorAll('.color-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            this.classList.add('selected');
-            console.log('Selected color changed to:', this.dataset.color);
-        });
-    });
 }
 // Formátování času pro timer
 function formatTime(seconds) {
@@ -135,16 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
     updateSliderUI();
     updateSpeedSliderUI();
     
-    // Přidat event listenery na barvy
-    document.querySelectorAll('.color-option').forEach(option => {
-        option.addEventListener('click', function() {
-            document.querySelectorAll('.color-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            this.classList.add('selected');
-            console.log('Selected color:', this.dataset.color);
-        });
-    });
+        // Event listenery na barvy jsou nyní přidávány dynamicky v updateColorOptions
 });
 
 // Funkce pro aktualizaci UI
@@ -165,6 +136,35 @@ function updateSpeedSliderUI() {
     if (isNaN(max) || isNaN(val) || max === 0) return;
     const percentage = (val / max) * 100;
     speedRange.style.background = `linear-gradient(to right, #385fad 0%, #385fad ${percentage}%, #444 ${percentage}%, #444 100%)`;
+}
+
+// Funkce pro aktualizaci barevných možností
+function updateColorOptions(colours) {
+    const colorGrid = document.getElementById('colorGrid');
+    colorGrid.innerHTML = '';
+    
+    colours.forEach(colour => {
+        const colorDiv = document.createElement('div');
+        colorDiv.className = 'color-option';
+        colorDiv.dataset.color = colour.label.toLowerCase();
+        colorDiv.style.backgroundColor = colour.hex;
+        
+        colorDiv.addEventListener('click', function() {
+            document.querySelectorAll('.color-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            this.classList.add('selected');
+            console.log('Selected color changed to:', this.dataset.color);
+        });
+        
+        colorGrid.appendChild(colorDiv);
+    });
+    
+    // Nastavit první barvu jako výchozí
+    const firstColor = colorGrid.querySelector('.color-option');
+    if (firstColor) {
+        firstColor.classList.add('selected');
+    }
 }
 
 // Event Listeners pro Color Picker
@@ -197,7 +197,7 @@ document.getElementById('confirmColorBtn').addEventListener('click', () => {
             console.error('Error sending purchase request:', error);
             vehiclePrice.textContent = 'Error processing purchase';
             setTimeout(() => {
-                vehiclePrice.textContent = `${parseInt(currentVehicleData.price).toLocaleString()}`;
+                vehiclePrice.textContent = `$ ${parseInt(currentVehicleData.price).toLocaleString()}`;
             }, 2000);
         });
     } else {
@@ -240,7 +240,7 @@ maxSpeedInput.addEventListener('input', () => {
     speedRange.value = val;
     const speedValue = document.getElementById('speedValue');
     if (speedValue) {
-        speedValue.textContent = `${val} mph`;
+        speedValue.textContent = `${val} ${speedUnit}`;
     }
     updateSpeedSliderUI();
     populateVehiclesGrid();
@@ -250,7 +250,7 @@ speedRange.addEventListener('input', () => {
     maxSpeedInput.value = speedRange.value;
     const speedValue = document.getElementById('speedValue');
     if (speedValue) {
-        speedValue.textContent = `${speedRange.value} mph`;
+        speedValue.textContent = `${speedRange.value} ${speedUnit}`;
     }
     updateSpeedSliderUI();
     populateVehiclesGrid();
@@ -258,9 +258,19 @@ speedRange.addEventListener('input', () => {
 
 // Pomocné funkce
 function getSelectedCategories() {
-    return Array.from(classFilter.querySelectorAll('input[type="checkbox"]:checked'))
-        .map(box => box.value.trim().toLowerCase());
+    const selected = Array.from(classFilter.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(box => {
+            // Oprava pro off-road kategorii
+            let value = box.value.trim().toLowerCase();
+            if (value === 'off-road') value = 'offroad';
+            return value;
+        });
+    console.log('Selected checkboxes:', selected);
+    return selected;
 }
+
+// Globální proměnná pro jednotku rychlosti
+let speedUnit = 'mph'; // Výchozí hodnota, bude přepsána z configu
 
 // Zpracování zpráv
 window.addEventListener('message', (event) => {
@@ -268,8 +278,57 @@ window.addEventListener('message', (event) => {
     if (data.action === 'open') {
         document.getElementById('colorPicker').style.display = 'none';
         vehicleShop.style.display = 'block';
-        categories = data.categories;
-        vehicles = data.vehicles;
+        
+        // Debug výpis přijatých dat
+        console.log('Received data from server:', data);
+        console.log('Categories received:', data.categories);
+        
+        categories = data.categories || {};
+        vehicles = data.vehicles || {};
+        speedUnit = data.speedUnit || 'mph';
+        currentShopType = data.shopType || 'car';
+        
+        // Aktualizace hodnoty rychlosti s jednotkou
+        const speedValue = document.getElementById('speedValue');
+        if (speedValue) {
+            speedValue.textContent = `${speedRange.value} ${speedUnit}`;
+        }
+        
+        // Uložení informace o povolení testovací jízdy
+        window.testDriveEnabled = data.testDriveEnabled !== undefined ? data.testDriveEnabled : true;
+        
+        // Zachováváme stejný název pro všechny typy obchodů
+        const shopTitle = document.querySelector('.shop-header h1');
+        if (shopTitle) {
+            shopTitle.innerHTML = 'PDM <small>Premium Deluxe Motorsport</small>';
+        }
+        
+        // Načtení barev z configu
+        if (data.colours && Array.isArray(data.colours)) {
+            colorMap = {};
+            data.colours.forEach(colour => {
+                // Převod hex na rgb
+                const hex = colour.hex.replace('#', '');
+                const r = parseInt(hex.substring(0, 2), 16);
+                const g = parseInt(hex.substring(2, 4), 16);
+                const b = parseInt(hex.substring(4, 6), 16);
+                
+                // Použít RGB hodnoty a colorIndex pokud existuje
+                colorMap[colour.label.toLowerCase()] = {
+                    r, g, b,
+                    colorIndex: colour.colorIndex !== undefined ? colour.colorIndex : 0
+                };
+            });
+            // Aktualizace barev v UI
+            updateColorOptions(data.colours);
+        }
+        
+        // Aktualizace jednotky rychlosti v UI
+        document.getElementById('speedUnitSuffix').textContent = speedUnit;
+        
+        // Dynamicky vytvořit kategorie z configu
+        populateCategoriesFromConfig();
+        
         updateSliderUI();
         updateSpeedSliderUI();
         populateVehiclesGrid();
@@ -289,6 +348,26 @@ window.addEventListener('message', (event) => {
     }
 });
 
+// Funkce pro dynamické vytvoření kategorií z configu
+function populateCategoriesFromConfig() {
+    const categoriesList = document.querySelector('.categories-list');
+    categoriesList.innerHTML = '';
+    
+    // Použijeme pouze kategorie z configu
+    if (categories && Object.keys(categories).length > 0) {
+        for (const [key, label] of Object.entries(categories)) {
+            const categoryLabel = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = key;
+            categoryLabel.appendChild(checkbox);
+            categoryLabel.appendChild(document.createTextNode(' ' + label));
+            categoriesList.appendChild(categoryLabel);
+            console.log('Created category from config:', key, label);
+        }
+    }
+}
+
 // Hlavní funkce pro zobrazení vozidel
 function populateVehiclesGrid() {
     vehiclesGrid.innerHTML = '';
@@ -297,6 +376,8 @@ function populateVehiclesGrid() {
 
     // Filtrování podle kategorií
     const selectedCategories = getSelectedCategories();
+    console.log('Selected categories:', selectedCategories);
+    
     if (selectedCategories.length > 0) {
         filteredVehicles = filteredVehicles.filter(vehicle => {
             let cat = vehicle.category;
@@ -308,7 +389,14 @@ function populateVehiclesGrid() {
                     }
                 }
             }
-            return selectedCategories.includes(String(cat).trim().toLowerCase());
+            
+            // Oprava pro off-road kategorii
+            if (cat === 'off-road') cat = 'offroad';
+            
+            const catLower = String(cat).trim().toLowerCase();
+            const result = selectedCategories.includes(catLower);
+            console.log(`Vehicle ${vehicle.model} category: ${catLower}, included: ${result}`);
+            return result;
         });
     }
 
@@ -323,7 +411,7 @@ function populateVehiclesGrid() {
     const maxSpeed = parseInt(speedRange.value, 10);
     filteredVehicles = filteredVehicles.filter(v => {
         if (!v.speed) return false;
-        const speedNum = parseInt(String(v.speed).replace(' mph', ''), 10);
+        const speedNum = parseInt(String(v.speed).replace(' mph', '').replace(' kmh', ''), 10);
         return speedNum <= maxSpeed;
     });
 
@@ -357,16 +445,36 @@ function populateVehiclesGrid() {
         let seats = vehicle.seats ? vehicle.seats : 'N/A';
 
         if (typeof speed === 'string') {
-            speed = speed.replace(' mph', '');
-        }
-        if (typeof seats === 'string') {
-            seats = seats.replace('x', '');
+            speed = speed.replace(' mph', '').replace(' kmh', '');
         }
 
+        // Vytvoření HTML pro kartu vozidla
+        let vehicleActionsHTML = `
+            <div class="vehicle-actions">
+                <button class="btn buy">
+                    <span class="btn-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="#385fad"><g fill="#385fad"><path d="M8 10a2 2 0 1 0 0-4a2 2 0 0 0 0 4z"/><path d="M0 4a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V4zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V6a2 2 0 0 1-2-2H3z"/></g></svg>
+                    </span>
+                    Buy
+                </button>`;
+                
+        // Přidání tlačítka pro testovací jízdu pouze pokud je povoleno
+        if (window.testDriveEnabled) {
+            vehicleActionsHTML += `
+                <button class="btn test-drive">
+                    <span class="btn-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 384 384" fill="#385fad"><path fill="#385fad" d="m340 64l44 128v171q0 8-6.5 14.5T363 384h-22q-8 0-14.5-6.5T320 363v-22H64v22q0 8-6.5 14.5T43 384H21q-8 0-14.5-6.5T0 363V192L44 64q8-21 31-21h234q23 0 31 21zM74.5 277q13.5 0 23-9t9.5-22.5t-9.5-23t-23-9.5t-22.5 9.5t-9 23t9 22.5t22.5 9zm235 0q13.5 0 22.5-9t9-22.5t-9-23t-22.5-9.5t-23 9.5t-9.5 23t9.5 22.5t23 9zM43 171h298l-32-96H75z"/></svg>
+                    </span>
+                    Test Drive
+                </button>`;
+        }
+        
+        vehicleActionsHTML += `</div>`;
+        
         card.innerHTML = `
             <div style="position: relative;">
-                <img src="${imageSrc}" alt="${vehicle.label}" style="width: 100%; border-radius: 8px 8px 0 0; height: 120px; object-fit: cover;" />
-                <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.7); color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px;">$${parseInt(vehicle.price).toLocaleString()}</div>
+                <img src="${imageSrc}" alt="${vehicle.label}" style="width: 100%; border-radius: 8px 8px 0 0; height: 140px; object-fit: cover;" />
+                <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.7); color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px;">$ ${parseInt(vehicle.price).toLocaleString()}</div>
             </div>
             <div style="padding: 8px;">
                 <h3 style="margin: 0 0 4px 0; color: white;">
@@ -378,27 +486,14 @@ function populateVehiclesGrid() {
                         <span class="icon-speed-bg">
                             <span class="icon-img"></span>
                         </span>
-                        <span class="icon-value">${speed} mph</span>
+                        <span class="icon-value">${speed} ${speedUnit}</span>
                     </div>
                     <div class="icon-seats">
                         <span class="icon-img"></span>
-                        <span class="icon-value">${seats}x</span>
+                        <span class="icon-value">${seats}</span>
                     </div>
                 </div>
-                <div class="vehicle-actions">
-                    <button class="btn buy">
-                        <span class="btn-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 16 16" fill="#385fad"><g fill="#385fad"><path d="M8 10a2 2 0 1 0 0-4a2 2 0 0 0 0 4z"/><path d="M0 4a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V4zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V6a2 2 0 0 1-2-2H3z"/></g></svg>
-                        </span>
-                        Buy
-                    </button>
-                    <button class="btn test-drive">
-                                            <span class="btn-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 384 384" fill="#385fad"><path fill="#385fad" d="m340 64l44 128v171q0 8-6.5 14.5T363 384h-22q-8 0-14.5-6.5T320 363v-22H64v22q0 8-6.5 14.5T43 384H21q-8 0-14.5-6.5T0 363V192L44 64q8-21 31-21h234q23 0 31 21zM74.5 277q13.5 0 23-9t9.5-22.5t-9.5-23t-23-9.5t-22.5 9.5t-9 23t9 22.5t22.5 9zm235 0q13.5 0 22.5-9t9-22.5t-9-23t-22.5-9.5t-23 9.5t-9.5 23t9.5 22.5t23 9zM43 171h298l-32-96H75z"/></svg>
-                        </span>
-                        Test Drive
-                    </button>
-                </div>
+                ${vehicleActionsHTML}
             </div>
         `;
 
@@ -409,19 +504,25 @@ function populateVehiclesGrid() {
                 model: vehicle.model,
                 label: vehicle.label,
                 price: vehicle.price,
-                image: vehicle.image || 'placeholder.png'
+                image: imageSrc
             });
         });
 
-        // Event listener pro Test Drive tlačítko
-        card.querySelector('.btn.test-drive').addEventListener('click', () => {
-            fetch(`https://${GetParentResourceName()}/startTestDrive`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({model: vehicle.model})
+        // Event listener pro Test Drive tlačítko (pouze pokud existuje)
+        const testDriveBtn = card.querySelector('.btn.test-drive');
+        if (testDriveBtn) {
+            testDriveBtn.addEventListener('click', () => {
+                fetch(`https://${GetParentResourceName()}/startTestDrive`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        model: vehicle.model,
+                        shopType: currentShopType
+                    })
+                });
+                vehicleShop.style.display = 'none';
             });
-            vehicleShop.style.display = 'none';
-        });
+        }
 
         vehiclesGrid.appendChild(card);
     });

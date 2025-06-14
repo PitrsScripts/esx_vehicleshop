@@ -63,7 +63,7 @@
                 <label class="speed-range-label">
                     <span class="input-mph-wrapper">
                         <input type="number" id="maxSpeedInput" min="0" max="300" step="1" value="300" />
-                        <span class="input-mph-suffix">mph</span>
+                        <span class="input-mph-suffix" id="speedUnitSuffix">mph</span>
                     </span>
                     <div class="speed-label-row">
                         <span class="speed-label-text">Speed Range</span>
@@ -82,16 +82,7 @@
                     </button>
                     <div class="collapsible-content">
                         <div class="categories-list">
-                            <label><input type="checkbox" value="compacts" /> Compacts</label>
-                            <label><input type="checkbox" value="muscle" /> Muscle</label>
-                            <label><input type="checkbox" value="motorcycles" /> Motorcycles</label>
-                            <label><input type="checkbox" value="sedans" /> Sedans</label>
-                            <label><input type="checkbox" value="sports" /> Sports</label>
-                            <label><input type="checkbox" value="suvs" /> SUVs</label>
-                            <label><input type="checkbox" value="vans" /> Vans</label>
-                            <label><input type="checkbox" value="off-road" /> Off-Road</label>
-                            <label><input type="checkbox" value="super" /> Super</label>
-                            <label><input type="checkbox" value="coupes" /> Coupes</label>
+                            <!-- Kategorie budou dynamicky generovány z configu -->
                         </div>
                     </div>
                 </div>
@@ -109,21 +100,12 @@
              <img id="vehiclePreviewImage" src="" alt="Vehicle Preview">
         </div>
         
-        <div class="color-grid">
-            <div class="color-option" data-color="black" style="background-color: #000000;"></div>
-            <div class="color-option" data-color="white" style="background-color: #FFFFFF;"></div>
-            <div class="color-option" data-color="red" style="background-color: #FF0000;"></div>
-            <div class="color-option" data-color="blue" style="background-color: #0000FF;"></div>
-            <div class="color-option" data-color="green" style="background-color: #00FF00;"></div>
-            <div class="color-option" data-color="yellow" style="background-color: #FFFF00;"></div>
-            <div class="color-option" data-color="orange" style="background-color: #FFA500;"></div>
-            <div class="color-option" data-color="purple" style="background-color: #800080;"></div>
-            <div class="color-option" data-color="pink" style="background-color: #FFC0CB;"></div>
-            <div class="color-option" data-color="gray" style="background-color: #808080;"></div>
+        <div class="color-grid" id="colorGrid">
+            <!-- Barvy budou dynamicky generovány z configu -->
         </div>
 
         <div class="price-info">
-            <span id="vehiclePrice"></span>
+            <span id="vehiclePrice" class="price-with-dollar"></span>
         </div>
 
         <div class="color-picker-buttons">
