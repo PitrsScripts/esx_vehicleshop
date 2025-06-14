@@ -456,13 +456,13 @@ body {
     background: none;
 }
 .collapsible-filter.open .collapsible-content {
-    max-height: 200px;
+    max-height: 400px;
     padding-bottom: 7px;
     padding-top: 3px;
 }
 .categories-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 5px;
 }
 .categories-list label {
@@ -546,7 +546,8 @@ body {
 /* VEHICLES GRID & CARDS */
 .vehicles-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-auto-rows: min-content;
     gap: 15px;
     padding: 10px;
     max-height: 70vh;
@@ -559,9 +560,11 @@ body {
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: stretch;
     overflow: hidden;
+    height: auto;
+    min-height: 0;
 }
 .vehicle-card:hover {
     background: rgba(255, 255, 255, 0.1);
@@ -588,7 +591,7 @@ body {
     left: 8px;
     background: rgba(0,0,0,0.7);
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: 8px; /* Increased border-radius for rounded corners */
     white-space: nowrap;
     z-index: 10;
 }
@@ -622,6 +625,10 @@ body {
     font-weight: 600;
     box-shadow: 0 1px 4px 0 rgba(30,30,40,0.09);
     color: #fff;
+}
+
+.icon-value {
+    white-space: nowrap;
 }
 .icon-speed {
     background: rgba(0, 255, 136, 0.08);
@@ -701,8 +708,8 @@ body {
     height: 18px;
 }
 .btn.buy .btn-icon svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     margin-right: 0;
     display: inline-block;
     vertical-align: middle;
@@ -733,8 +740,8 @@ body {
     height: 18px;
 }
 .btn.test-drive .btn-icon svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     display: inline-block;
     vertical-align: middle;
     margin-right: 0;
