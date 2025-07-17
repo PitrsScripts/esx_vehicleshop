@@ -45,6 +45,8 @@ Designed for both new and experienced players
 
 No showroom zones or map locations required — everything runs directly from the menu
 
+https://imgur.com/a/FDxyZP2
+
 ###  📦 Resource Info
 |||
 | --- | --- |
