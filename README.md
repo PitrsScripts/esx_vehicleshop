@@ -1,6 +1,6 @@
 # ESX VEHICLE SHOP
 
-pitrs-vehicleshop is a clean and lightweight ESX vehicle shop system that allows players to buy, sell, and test vehicles through a user-friendly interface powered by ox_lib. Designed for servers that want a modern vehicle shop experience without a showroom, it focuses on simplicity, functionality, and easy integration.
+esx-vehicleshop is a clean and lightweight ESX vehicle shop system that allows players to buy, sell, and test vehicles through a user-friendly interface powered by ox_lib. Designed for servers that want a modern vehicle shop experience without a showroom, it focuses on simplicity, functionality, and easy integration.
 
 **🚗 Features**
 **🛒 Vehicle Purchase**
