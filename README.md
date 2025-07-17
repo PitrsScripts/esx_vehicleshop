@@ -45,9 +45,12 @@ Designed for both new and experienced players
 
 No showroom zones or map locations required — everything runs directly from the menu
 
-📦 Resource Info
-Code is accessible	Yes
-Subscription-based	No
-Lines (approx.)	~1 234
-Dependencies	ox_lib, es_extended
-Support	Yes
+###  📦 Resource Info
+|||
+| --- | --- |
+|**Code is accessible**|Yes|
+|**Subscription-based**|No|
+|**Lines (approximately)**|~1 234|
+|**Requirements**|ox_lib|
+|**Support**|Yes|
+
