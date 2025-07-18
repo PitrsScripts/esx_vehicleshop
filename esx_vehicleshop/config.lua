@@ -2,7 +2,7 @@ Config = {}
 
 Config.Locale = "cs" -- cs,en,cn,de,es,hu,no,pl,ru,tr,vi
 
-Config.Interaction = "jg_textui" -- Interaction Type (ox_textui,ox_target,jg_textui)
+Config.Interaction = "ox_textui" -- Interaction Type (ox_textui,ox_target,jg_textui)
 Config.SpeedUnit = "mph" -- Speed Unit (mph or kmh)
 
 
@@ -10,7 +10,7 @@ Config.SpeedUnit = "mph" -- Speed Unit (mph or kmh)
 Config.Shops = {
     car = {
         enabled = true,
-            location = vector3(-56.4603, -1097.8053, 26.4223), -- PDM location (x, y, z)
+            location = vector3(220.3054, -808.9489, 30.6720), -- PDM location (x, y, z)
         npc = {
             model = "a_m_y_business_03",
             sellNPC = {
