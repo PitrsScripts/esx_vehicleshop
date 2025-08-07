@@ -45,7 +45,8 @@ Designed for both new and experienced players
 
 No showroom zones or map locations required — everything runs directly from the menu
 
-https://imgur.com/a/FDxyZP2
+<img width="1019" height="681" alt="{16C6FFA0-6DCF-47D8-B03C-329255CCC986}" src="https://github.com/user-attachments/assets/3c342ce4-dbb9-4657-8057-aab1d8c59583" />
+
 
 ###  📦 Resource Info
 |||
