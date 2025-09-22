@@ -35,7 +35,9 @@ files {
 dependencies {
 	'es_extended',
 	'oxmysql',
-	'ox_lib'
+	'ox_lib',
+	'async'
 }
 
 lua54 'yes'
+
