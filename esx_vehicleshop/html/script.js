@@ -278,31 +278,35 @@ window.addEventListener('message', (event) => {
     if (data.action === 'open') {
         document.getElementById('colorPicker').style.display = 'none';
         vehicleShop.style.display = 'block';
-        
+        // Smooth fade-in effect
+        vehicleShop.classList.remove('fade-in');
+        void vehicleShop.offsetWidth; // Force reflow
+        vehicleShop.classList.add('fade-in');
+
         // Debug výpis přijatých dat
         console.log('Received data from server:', data);
         console.log('Categories received:', data.categories);
-        
+
         categories = data.categories || {};
         vehicles = data.vehicles || {};
         speedUnit = data.speedUnit || 'mph';
         currentShopType = data.shopType || 'car';
-        
+
         // Aktualizace hodnoty rychlosti s jednotkou
         const speedValue = document.getElementById('speedValue');
         if (speedValue) {
             speedValue.textContent = `${speedRange.value} ${speedUnit}`;
         }
-        
+
         // Uložení informace o povolení testovací jízdy
         window.testDriveEnabled = data.testDriveEnabled !== undefined ? data.testDriveEnabled : true;
-        
+
         // Zachováváme stejný název pro všechny typy obchodů
         const shopTitle = document.querySelector('.shop-header h1');
         if (shopTitle) {
             shopTitle.innerHTML = 'PDM <small>Premium Deluxe Motorsport</small>';
         }
-        
+
         // Načtení barev z configu
         if (data.colours && Array.isArray(data.colours)) {
             colorMap = {};
@@ -312,7 +316,7 @@ window.addEventListener('message', (event) => {
                 const r = parseInt(hex.substring(0, 2), 16);
                 const g = parseInt(hex.substring(2, 4), 16);
                 const b = parseInt(hex.substring(4, 6), 16);
-                
+
                 // Použít RGB hodnoty a colorIndex pokud existuje
                 colorMap[colour.label.toLowerCase()] = {
                     r, g, b,
@@ -322,19 +326,20 @@ window.addEventListener('message', (event) => {
             // Aktualizace barev v UI
             updateColorOptions(data.colours);
         }
-        
+
         // Aktualizace jednotky rychlosti v UI
         document.getElementById('speedUnitSuffix').textContent = speedUnit;
-        
+
         // Dynamicky vytvořit kategorie z configu
         populateCategoriesFromConfig();
-        
+
         updateSliderUI();
         updateSpeedSliderUI();
         populateVehiclesGrid();
     } else if (data.action === 'close') {
         vehicleShop.style.display = 'none';
         document.getElementById('colorPicker').style.display = 'none';
+        vehicleShop.classList.remove('fade-in');
         clearSelection();
     } else if (data.action === 'startTestDriveTimer') {
         showTestDriveTimer(data.time || 60);
@@ -376,8 +381,6 @@ function populateVehiclesGrid() {
 
     // Filtrování podle kategorií
     const selectedCategories = getSelectedCategories();
-    console.log('Selected categories:', selectedCategories);
-    
     if (selectedCategories.length > 0) {
         filteredVehicles = filteredVehicles.filter(vehicle => {
             let cat = vehicle.category;
@@ -389,14 +392,9 @@ function populateVehiclesGrid() {
                     }
                 }
             }
-            
-            // Oprava pro off-road kategorii
             if (cat === 'off-road') cat = 'offroad';
-            
             const catLower = String(cat).trim().toLowerCase();
-            const result = selectedCategories.includes(catLower);
-            console.log(`Vehicle ${vehicle.model} category: ${catLower}, included: ${result}`);
-            return result;
+            return selectedCategories.includes(catLower);
         });
     }
 
@@ -423,8 +421,10 @@ function populateVehiclesGrid() {
         );
     }
 
-    // Vykreslení vozidel
-    filteredVehicles.forEach(vehicle => {
+    // Vykreslení vozidel (optimalizováno pomocí DocumentFragment)
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < filteredVehicles.length; i++) {
+        const vehicle = filteredVehicles[i];
         const card = document.createElement('div');
         card.classList.add('vehicle-card');
 
@@ -448,7 +448,6 @@ function populateVehiclesGrid() {
             speed = speed.replace(' mph', '').replace(' kmh', '');
         }
 
-        // Vytvoření HTML pro kartu vozidla
         let vehicleActionsHTML = `
             <div class="vehicle-actions">
                 <button class="btn buy">
@@ -457,8 +456,6 @@ function populateVehiclesGrid() {
                     </span>
                     Buy
                 </button>`;
-                
-        // Přidání tlačítka pro testovací jízdu pouze pokud je povoleno
         if (window.testDriveEnabled) {
             vehicleActionsHTML += `
                 <button class="btn test-drive">
@@ -468,9 +465,8 @@ function populateVehiclesGrid() {
                     Test Drive
                 </button>`;
         }
-        
         vehicleActionsHTML += `</div>`;
-        
+
         card.innerHTML = `
             <div style="position: relative;">
                 <img src="${imageSrc}" alt="${vehicle.label}" style="width: 100%; border-radius: 8px 8px 0 0; height: 140px; object-fit: cover;" />
@@ -497,9 +493,7 @@ function populateVehiclesGrid() {
             </div>
         `;
 
-        // Event listener pro Buy tlačítko
         card.querySelector('.btn.buy').addEventListener('click', () => {
-            console.log(`Buy button clicked for ${vehicle.model} with price ${vehicle.price}`);
             openColorPicker({
                 model: vehicle.model,
                 label: vehicle.label,
@@ -508,7 +502,6 @@ function populateVehiclesGrid() {
             });
         });
 
-        // Event listener pro Test Drive tlačítko (pouze pokud existuje)
         const testDriveBtn = card.querySelector('.btn.test-drive');
         if (testDriveBtn) {
             testDriveBtn.addEventListener('click', () => {
@@ -524,8 +517,9 @@ function populateVehiclesGrid() {
             });
         }
 
-        vehiclesGrid.appendChild(card);
-    });
+        fragment.appendChild(card);
+    }
+    vehiclesGrid.appendChild(fragment);
 }
 
 // Funkce pro vyčištění výběru

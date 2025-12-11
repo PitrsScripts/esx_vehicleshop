@@ -1,3 +1,13 @@
+/* Smooth fade-in for PDM UI */
+.fade-in {
+    animation: pdmFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    opacity: 0;
+}
+
+@keyframes pdmFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 * {
     margin: 0;
     padding: 0;
